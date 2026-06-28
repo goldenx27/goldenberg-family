@@ -10,8 +10,11 @@ BASE_DIR = Path(__file__).resolve().parent
 
 app = Flask(__name__)
 app.config["SECRET_KEY"] = "change-this-secret-key-before-production"
-app.config["SQLALCHEMY_DATABASE_URI"] = f"sqlite:///{BASE_DIR / 'instance' / 'family_hub.db'}"
+instance_dir = BASE_DIR / "instance"
+instance_dir.mkdir(parents=True, exist_ok=True)
+app.config["SQLALCHEMY_DATABASE_URI"] = f"sqlite:///{instance_dir / 'family_hub.db'}"
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
+
 
 db = SQLAlchemy(app)
 login_manager = LoginManager(app)
@@ -70,6 +73,8 @@ def load_user(user_id):
 
 
 def create_default_data():
+    import os
+    os.makedirs("database", exist_ok=True)
     db.create_all()
     if not User.query.filter_by(username="ronen").first():
         admin = User(username="ronen", full_name="רונן גולדנברג", role="admin", must_change_password=True)
