@@ -9,7 +9,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 BASE_DIR = Path(__file__).resolve().parent
 
 app = Flask(__name__)
-app.config["SECRET_KEY"] = "change-this-secret-key-before-production"
+app.config["SECRET_KEY"] = os.environ.get("SECRET_KEY","dev-secret-key")
 instance_dir = BASE_DIR / "instance"
 instance_dir.mkdir(parents=True, exist_ok=True)
 app.config["SQLALCHEMY_DATABASE_URI"] = f"sqlite:///{instance_dir / 'family_hub.db'}"
@@ -74,9 +74,6 @@ def load_user(user_id):
 
 def create_default_data():
     import os
-    os.makedirs("database", exist_ok=True)
-    with app.app_context():
-        db.create_all()
     if not User.query.filter_by(username="ronen").first():
         admin = User(username="ronen", full_name="רונן גולדנברג", role="admin", must_change_password=True)
         admin.set_password("123456")
