@@ -75,7 +75,8 @@ def load_user(user_id):
 def create_default_data():
     import os
     os.makedirs("database", exist_ok=True)
-    db.create_all()
+    with app.app_context():
+        db.create_all()
     if not User.query.filter_by(username="ronen").first():
         admin = User(username="ronen", full_name="רונן גולדנברג", role="admin", must_change_password=True)
         admin.set_password("123456")
