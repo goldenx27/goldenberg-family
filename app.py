@@ -209,6 +209,56 @@ def reset_medications():
     flash("כל סימוני התרופות אופסו", "success")
     return redirect(url_for("dashboard"))
 
+@app.route("/medications", methods=["GET", "POST"])
+@login_required
+def medications():
+    if request.method == "POST":
+        user_id = request.form.get("user_id", type=int)
+        name = request.form.get("name", "").strip()
+        time_of_day = request.form.get("time_of_day", "בוקר")
+        notes = request.form.get("notes", "").strip()
+
+        if not current_user.is_admin:
+            user_id = current_user.id
+
+        if not name:
+            flash("חובה להזין שם תרופה", "danger")
+        else:
+            med = Medication(
+                user_id=user_id,
+                name=name,
+                time_of_day=time_of_day,
+                notes=notes
+            )
+            db.session.add(med)
+            db.session.commit()
+            flash("התרופה נוספה בהצלחה", "success")
+
+    users = User.query.filter_by(is_active_flag=True).order_by(User.full_name).all() if current_user.is_admin else [current_user]
+
+    meds = (
+        Medication.query.join(User)
+        .filter(User.is_active_flag == True)
+        .order_by(User.full_name, Medication.time_of_day, Medication.name)
+        .all()
+        if current_user.is_admin
+        else Medication.query.filter_by(user_id=current_user.id).order_by(Medication.time_of_day, Medication.name).all()
+    )
+
+    return render_template("medications.html", users=users, meds=meds)
+
+@app.route("/medications/<int:med_id>/toggle", methods=["POST"])
+@login_required
+def toggle_medication(med_id):
+    med = Medication.query.get_or_404(med_id)
+
+    if not current_user.is_admin and med.user_id != current_user.id:
+        abort(403)
+
+    med.taken_today = not med.taken_today
+    db.session.commit()
+    return redirect(url_for("medications"))
+
 with app.app_context():
     db.create_all()
     create_default_data()
