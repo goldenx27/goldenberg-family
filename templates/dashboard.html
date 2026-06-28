@@ -1,39 +1,83 @@
-{% extends 'base.html' %}
+{% extends "base.html" %}
+
 {% block content %}
-<div class="d-flex justify-content-between align-items-center mb-4">
-  <div>
-    <h1 class="h3 mb-1">שלום {{ current_user.full_name }}</h1>
-    <p class="text-muted mb-0">לוח הבית המשפחתי</p>
-  </div>
-  {% if current_user.is_admin %}<a class="btn btn-outline-primary" href="{{ url_for('users') }}">ניהול משתמשים</a>{% endif %}
-</div>
+<div class="container py-4" dir="rtl">
 
-<div class="row g-3 mb-4">
-  {% for user in users %}
-  <div class="col-md-4">
-    <div class="card dashboard-card shadow-sm rounded-4">
-      <div class="card-body">
-        <h2 class="h5">👤 {{ user.full_name }}</h2>
-        <p class="mb-2 text-muted">שם משתמש: {{ user.username }}</p>
-        <div class="d-grid gap-2">
-          <button class="btn btn-light" disabled>💊 תרופות - בקרוב</button>
-          <button class="btn btn-light" disabled>📅 תורים - בקרוב</button>
-          <button class="btn btn-light" disabled>📄 מסמכים - בקרוב</button>
-        </div>
-      </div>
+    <div class="mb-4">
+        <h2>שלום {{ current_user.full_name }} 👋</h2>
+        <p class="text-muted">ברוך הבא ל־Family Hub</p>
     </div>
-  </div>
-  {% endfor %}
-</div>
 
-<div class="row g-3">
-  <div class="col-md-3"><div class="stat-card">💊<strong>תרופות</strong><span>מודול הבא</span></div></div>
-  <div class="col-md-3"><div class="stat-card">📅<strong>תורים</strong><span>מודול הבא</span></div></div>
-  <div class="col-md-3"><div class="stat-card">📄<strong>מסמכים</strong><span>בהמשך</span></div></div>
-  <div class="col-md-3"><div class="stat-card">🛒<strong>קניות</strong><span>בהמשך</span></div></div>
-</div>
+    <div class="row g-3 mb-4">
 
-<form method="post" action="{{ url_for('reset_medications') }}" class="mt-4">
-  <button class="btn btn-warning">אפס סימוני תרופות יומיים</button>
-</form>
+        <div class="col-md-4">
+            <div class="card shadow-sm border-0 rounded-4">
+                <div class="card-body">
+                    <h5>👨‍👩‍👧‍👦 בני משפחה</h5>
+                    <div class="display-6">{{ total_users }}</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card shadow-sm border-0 rounded-4">
+                <div class="card-body">
+                    <h5>💊 תרופות ממתינות</h5>
+                    <div class="display-6">{{ pending_meds }}</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card shadow-sm border-0 rounded-4">
+                <div class="card-body">
+                    <h5>📅 תורים קרובים</h5>
+                    <div class="display-6">{{ upcoming_appointments|length }}</div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="card shadow-sm border-0 rounded-4 mb-4">
+        <div class="card-body">
+            <h4 class="mb-3">פעולות מהירות</h4>
+
+            <a href="{{ url_for('users') }}" class="btn btn-primary m-1">
+                👥 ניהול משתמשים
+            </a>
+
+            <form method="post" action="{{ url_for('reset_medications') }}" class="d-inline">
+                <button class="btn btn-warning m-1">
+                    🔄 איפוס תרופות
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <div class="card shadow-sm border-0 rounded-4">
+        <div class="card-body">
+            <h4 class="mb-3">תורים קרובים</h4>
+
+            {% if upcoming_appointments %}
+                <ul class="list-group list-group-flush">
+                    {% for appt in upcoming_appointments %}
+                        <li class="list-group-item">
+                            <strong>{{ appt.title }}</strong><br>
+                            <span class="text-muted">
+                                {{ appt.appointment_time.strftime('%d/%m/%Y %H:%M') }}
+                                {% if appt.location %}
+                                    · {{ appt.location }}
+                                {% endif %}
+                            </span>
+                        </li>
+                    {% endfor %}
+                </ul>
+            {% else %}
+                <p class="text-muted">אין תורים קרובים.</p>
+            {% endif %}
+        </div>
+    </div>
+
+</div>
 {% endblock %}

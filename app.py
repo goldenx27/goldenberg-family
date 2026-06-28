@@ -1,6 +1,6 @@
 from datetime import datetime
 from pathlib import Path
-
+import os
 from flask import Flask, render_template, redirect, url_for, request, flash, abort
 from flask_login import LoginManager, UserMixin, login_user, logout_user, login_required, current_user
 from flask_sqlalchemy import SQLAlchemy
@@ -73,7 +73,6 @@ def load_user(user_id):
 
 
 def create_default_data():
-    import os
     if not User.query.filter_by(username="ronen").first():
         admin = User(username="ronen", full_name="רונן גולדנברג", role="admin", must_change_password=True)
         admin.set_password("123456")
@@ -138,9 +137,32 @@ def change_password():
 @app.route("/dashboard")
 @login_required
 def dashboard():
-    users = User.query.filter_by(is_active_flag=True).order_by(User.full_name).all() if current_user.is_admin else [current_user]
-    return render_template("dashboard.html", users=users)
+    users = (
+        User.query.filter_by(is_active_flag=True).order_by(User.full_name).all()
+        if current_user.is_admin
+        else [current_user]
+    )
 
+    total_users = len(users)
+
+    pending_meds = Medication.query.filter_by(taken_today=False).count() if current_user.is_admin else \
+        Medication.query.filter_by(user_id=current_user.id, taken_today=False).count()
+
+    upcoming_appointments = (
+        Appointment.query
+        .filter(Appointment.appointment_time >= datetime.utcnow())
+        .order_by(Appointment.appointment_time.asc())
+        .limit(5)
+        .all()
+    )
+
+    return render_template(
+        "dashboard.html",
+        users=users,
+        total_users=total_users,
+        pending_meds=pending_meds,
+        upcoming_appointments=upcoming_appointments
+    )
 
 @app.route("/users", methods=["GET", "POST"])
 @login_required
