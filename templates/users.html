@@ -1,0 +1,47 @@
+{% extends 'base.html' %}
+{% block content %}
+<h1 class="h3 mb-4">ניהול משתמשים</h1>
+<div class="row g-4">
+  <div class="col-md-4">
+    <div class="card p-3 rounded-4 shadow-sm">
+      <h2 class="h5 mb-3">הוספת משתמש</h2>
+      <form method="post">
+        <label class="form-label">שם משתמש באנגלית</label>
+        <input name="username" class="form-control mb-2" placeholder="ilana">
+        <label class="form-label">שם מלא בעברית</label>
+        <input name="full_name" class="form-control mb-2" placeholder="אילנה גולדנברג">
+        <label class="form-label">הרשאה</label>
+        <select name="role" class="form-select mb-3">
+          <option value="user">משתמש רגיל</option>
+          <option value="admin">מנהל</option>
+        </select>
+        <button class="btn btn-primary w-100">הוסף</button>
+      </form>
+    </div>
+  </div>
+  <div class="col-md-8">
+    <div class="card rounded-4 shadow-sm overflow-hidden">
+      <table class="table table-hover mb-0 align-middle">
+        <thead><tr><th>שם מלא</th><th>משתמש</th><th>הרשאה</th><th>סטטוס</th><th></th></tr></thead>
+        <tbody>
+        {% for user in users %}
+          <tr>
+            <td>{{ user.full_name }}</td>
+            <td>{{ user.username }}</td>
+            <td>{{ 'מנהל' if user.is_admin else 'רגיל' }}</td>
+            <td>{{ 'פעיל' if user.is_active_flag else 'מושבת' }}</td>
+            <td>
+              {% if user.id != current_user.id and user.is_active_flag %}
+              <form method="post" action="{{ url_for('delete_user', user_id=user.id) }}" onsubmit="return confirm('להשבית משתמש?')">
+                <button class="btn btn-sm btn-outline-danger">מחיקה</button>
+              </form>
+              {% endif %}
+            </td>
+          </tr>
+        {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock %}

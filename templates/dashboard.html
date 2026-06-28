@@ -1,0 +1,39 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <div>
+    <h1 class="h3 mb-1">שלום {{ current_user.full_name }}</h1>
+    <p class="text-muted mb-0">לוח הבית המשפחתי</p>
+  </div>
+  {% if current_user.is_admin %}<a class="btn btn-outline-primary" href="{{ url_for('users') }}">ניהול משתמשים</a>{% endif %}
+</div>
+
+<div class="row g-3 mb-4">
+  {% for user in users %}
+  <div class="col-md-4">
+    <div class="card dashboard-card shadow-sm rounded-4">
+      <div class="card-body">
+        <h2 class="h5">👤 {{ user.full_name }}</h2>
+        <p class="mb-2 text-muted">שם משתמש: {{ user.username }}</p>
+        <div class="d-grid gap-2">
+          <button class="btn btn-light" disabled>💊 תרופות - בקרוב</button>
+          <button class="btn btn-light" disabled>📅 תורים - בקרוב</button>
+          <button class="btn btn-light" disabled>📄 מסמכים - בקרוב</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+
+<div class="row g-3">
+  <div class="col-md-3"><div class="stat-card">💊<strong>תרופות</strong><span>מודול הבא</span></div></div>
+  <div class="col-md-3"><div class="stat-card">📅<strong>תורים</strong><span>מודול הבא</span></div></div>
+  <div class="col-md-3"><div class="stat-card">📄<strong>מסמכים</strong><span>בהמשך</span></div></div>
+  <div class="col-md-3"><div class="stat-card">🛒<strong>קניות</strong><span>בהמשך</span></div></div>
+</div>
+
+<form method="post" action="{{ url_for('reset_medications') }}" class="mt-4">
+  <button class="btn btn-warning">אפס סימוני תרופות יומיים</button>
+</form>
+{% endblock %}
