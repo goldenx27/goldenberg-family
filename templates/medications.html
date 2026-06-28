@@ -3,28 +3,70 @@
 {% block content %}
 <div class="container py-4" dir="rtl">
 
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <div>
-            <h2>💊 תרופות</h2>
-            <p class="text-muted">ניהול תרופות וסימון יומי</p>
-        </div>
-        <a href="{{ url_for('dashboard') }}" class="btn btn-outline-secondary">חזרה</a>
-    </div>
+    <h2 class="mb-3">💊 תרופות</h2>
 
-    <!-- כאן בדיוק הבלוק ששלחת -->
+    <button class="btn btn-primary w-100 rounded-4 py-3 mb-3"
+            type="button"
+            data-bs-toggle="collapse"
+            data-bs-target="#addMedicationForm"
+            aria-expanded="false">
+        ➕ הוספת תרופה
+    </button>
+
+    <div class="collapse mb-4" id="addMedicationForm">
+        <div class="card shadow-sm border-0 rounded-4">
+            <div class="card-body">
+                <form method="post">
+                    {% if current_user.is_admin %}
+                    <div class="mb-3">
+                        <label class="form-label">משתמש</label>
+                        <select name="user_id" class="form-select">
+                            {% for user in users %}
+                                <option value="{{ user.id }}">{{ user.full_name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    {% endif %}
+
+                    <div class="mb-3">
+                        <label class="form-label">שם התרופה</label>
+                        <input name="name" class="form-control" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">זמן ביום</label>
+                        <select name="time_of_day" class="form-select">
+                            <option>בוקר</option>
+                            <option>צהריים</option>
+                            <option>ערב</option>
+                            <option>לילה</option>
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">הערות</label>
+                        <input name="notes" class="form-control">
+                    </div>
+
+                    <button class="btn btn-success w-100">שמור תרופה</button>
+                </form>
+            </div>
+        </div>
+    </div>
 
     <div class="card shadow-sm border-0 rounded-4">
         <div class="card-body">
             <h4 class="mb-3">רשימת תרופות</h4>
 
             {% if meds %}
-                {% for med in meds %}
+                <div class="list-group">
+                    {% for med in meds %}
                     <div class="list-group-item d-flex justify-content-between align-items-center">
                         <div>
                             <strong>{{ med.name }}</strong>
                             <div class="text-muted">
                                 {{ med.user.full_name }} · {{ med.time_of_day }}
-                                {% if med.notes %} · {{ med.notes }} {% endif %}
+                                {% if med.notes %} · {{ med.notes }}{% endif %}
                             </div>
                         </div>
 
@@ -34,7 +76,8 @@
                             </button>
                         </form>
                     </div>
-                {% endfor %}
+                    {% endfor %}
+                </div>
             {% else %}
                 <p class="text-muted">עדיין לא נוספו תרופות.</p>
             {% endif %}
