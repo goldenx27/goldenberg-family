@@ -192,6 +192,7 @@ def reset_medications():
 
 with app.app_context():
     db.create_all()
+    create_default_data()
 
 if __name__ == "__main__":
 
